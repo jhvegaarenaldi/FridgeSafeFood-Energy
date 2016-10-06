@@ -8,16 +8,16 @@
 #include <ArduinoJson.h>
 
 // REST API params Artik Cloud Connection
-char ServerArtik[] = "api.artik.cloud";  
-int portTCP = 443; //(port 443 is default for HTTPS)
-WiFiSSLClient clientArtik;
-String AuthorizationData = "Authorization: Bearer <INSERT YOU ID>";
-char buffer[200];
+char ServerArtik[] = "api.artik.cloud";   // Artik Cloud Name Server
+int portTCP = 443;                        //(port 443 is default for HTTPS)
+WiFiSSLClient clientArtik;                // Definition Class WiFiSSLClient
+String AuthorizationData = "Authorization: Bearer <INSERT YOU ID>";  // Autorization Id --> please Insert you ID
+char buffer[200];                         // buffer is used by send message to Cloud
 
 // Parameters WIFI conection
-char ssid[] = "";      //  your wifi network SSID (name)
-char pass[] = "";  // your password wifi
-int status = WL_IDLE_STATUS;
+char ssid[] = "YOU SSID WIFI";      //  your wifi network SSID (name)
+char pass[] = "THE PASSWORD WIFI";  // your password wifi
+int status = WL_IDLE_STATUS;        // status is used know result WiFi connection (WiFI.begin)
 
 // Variable and Constant used in Program 
 int SENSORDOOR = 3; // define the obstacle avoidance sensor interface - MKR1000 pin ~3
@@ -27,8 +27,9 @@ unsigned long currentMillis = 0, previousMillis=0;  // variable used to control 
 unsigned signalDuration=300; // lapsed time long BEEP sound
 unsigned int CountSendAlert=1; // variable used to control message to Artik
 const long intervalBEEP = 20*1000; // => 20 secons Door Open -> Sound Alarm
-const int IntervalSendAlert = 5 ; // => variable used to control the elapsed time  -> in MINUTES ( It must be set equal to RULE ARTIK CLOUD).
+const int IntervalSendAlert = 5 ; // => variable used to control the elapsed time  -> in MINUTES ( It must be set equal to RULE ARTIK CLOUD definitions).
 const long intervalMAIL = IntervalSendAlert * 60 * 1000; // => the value (IntervalSendAlert) means minutes Door Open too long -> Message to Artik
+
 
 void setup ()
 {
@@ -40,20 +41,20 @@ void setup ()
 
 void loop ()
 {
-  Sensorval = digitalRead (SENSORDOOR) ;// digital interface input data obstacle avoidance sensor
+  Sensorval = digitalRead (SENSORDOOR) ;//  input data obstacle avoidance sensor
   if (Sensorval == HIGH) // When the obstacle avoidance sensor detects a open/close door
   {
-    currentMillis = millis();
+    currentMillis = millis();  
     if ( currentMillis - previousMillis >= intervalBEEP )  // Verify elapsed time from open door ( elapsed time 20 seconds Alert Beep)
     {
-      Beep(signalDuration);
+      Beep(signalDuration);  // call function Beep with the duration signal sound 
     } 
-//    Verify elapsed time from open door ( elapsed time ( intervalMAIL * CountSendAlert ) minutes send message to Artik Cloud )
+// Verify elapsed time from open door ( elapsed time ( intervalMAIL * CountSendAlert ) minutes send message to Artik Cloud )
     if ( currentMillis - previousMillis >= ( intervalMAIL * CountSendAlert ) ) 
     {
-         signalDuration=90;  // Duration sound beep , time in ms 
-         Beep(signalDuration);  // Signal audible (Beep) --> Open Door Long Time
-         if (status != WL_CONNECTED ) // Retry connect to WIFI if not previus connected WIFI
+         signalDuration=90;             // Duration sound beep , time in ms 
+         Beep(signalDuration);          // Signal audible (Beep) --> Open Door Long Time
+         if (status != WL_CONNECTED )   // Retry connect to WIFI if not previus connected WIFI
          {  ConnectToWIFI(ssid,pass); }
          clientArtik.connect(ServerArtik, portTCP); // Connect to Artik Cloud 
          if (!clientArtik.connected()) 
@@ -62,13 +63,13 @@ void loop ()
             }
          else
             {
-              SendAlertToArtikCloud(CountSendAlert*IntervalSendAlert); // Send Message to Artik Cloud ( elapsed time Open Door )
+              SendAlertToArtikCloud(CountSendAlert*IntervalSendAlert);    // Send Message to Artik Cloud ( elapsed time Open Door )
             }
          CountSendAlert++;
      } 
  } else
   {
-    //Door Close Fridge ( Safe state , food OK and efficient energy  OK ).
+    //Door Close Fridge ( Safe state , food OK and efficient energy  OK )
     previousMillis = millis() ;
     signalDuration=300;
   }
@@ -81,10 +82,10 @@ void Beep(int duration){ // This function allow play signal audible
       delay (duration);
 }
 
-void SendAlertToArtikCloud(int tdoor) 
-// Function allow Send Data to Artik Cloud
+void SendAlertToArtikCloud(int tdoor) // Function allow Send Data to Artik Cloud
 {
       Serial.println("Sending data - "+String(tdoor));
+      // Set Header Message HTTP
       clientArtik.println("POST /v1.1/messages HTTP/1.1");
       clientArtik.println("Host: api.artik.cloud");
       clientArtik.println("Accept: */*");
@@ -92,7 +93,7 @@ void SendAlertToArtikCloud(int tdoor)
       clientArtik.println("Connection: close");
       clientArtik.println(AuthorizationData);
 
-       // Automated POST data section
+       // Set POST data section
        clientArtik.print("Content-Length: ");
        clientArtik.println(loadBuffer(tdoor)); // loads buffer, returns length
        clientArtik.println();
@@ -102,15 +103,15 @@ void SendAlertToArtikCloud(int tdoor)
 }
 
 
-int loadBuffer(int Value ) {  
+int loadBuffer(int Value ) {  // Create object JSON 
    StaticJsonBuffer<200> jsonBuffer; // reserve spot in memory
 
    JsonObject& root = jsonBuffer.createObject(); // create root objects
-     root["sdid"] = "<YOU SDID>"; // FIX 
+     root["sdid"] = "<YOU SDID>"; // You Device ID , the value in Device Info --> DEVICE ID 
      root["type"] = "message";
 
    JsonObject& dataPair = root.createNestedObject("data"); // create nested objects
-     dataPair["OpenDoor"] = Value;  
+     dataPair["OpenDoor"] = Value;    // OpenDoor defined in Manifest -> Fields
 
    root.printTo(buffer, sizeof(buffer)); // JSON-print to buffer
 
@@ -119,9 +120,9 @@ int loadBuffer(int Value ) {
 
 int ConnectToWIFI(char *id,char *passw) { 
   /* Function ConnectToWIFI - allow connect to WIFI 
-   => Connection Failure to WIFI = 3 BEEP when POWER ON MKR1000
-      -> 3 retry failed it means no connection WIFI 
-   => Connection OK to WIFI = NOT BEEP when POWER ON MKR1000
+   => When connection Failure to WIFI = 3 BEEP when POWER ON MKR1000
+      -> IF 3 retry failed , then means no connection WIFI , retry later....
+   => When connection to WIFI is OK  = NOT BEEP when POWER ON MKR1000
 */ 
     int retry=1;
     Serial.println("Connect to Wifi Device.. please wait");
@@ -132,7 +133,7 @@ int ConnectToWIFI(char *id,char *passw) {
        retry++;
     }
     if (status == WL_CONNECTED ){
-       Serial.println("connected to WiFi ");}
+       Serial.println("Connected to WiFi is OK ");}
     else{
       Serial.println("Error to connect Wifi name = "+String(id));
       Serial.println("ONLY ACTIVE LOCAL ALARM AUDIBLE !! ");
