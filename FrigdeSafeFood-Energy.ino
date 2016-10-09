@@ -7,28 +7,28 @@
 #include <WiFi101.h>
 #include <ArduinoJson.h>
 
-// REST API params Artik Cloud Connection
+//Set REST API params Artik Cloud Connection
 char ServerArtik[] = "api.artik.cloud";   // Artik Cloud Name Server
 int portTCP = 443;                        //(port 443 is default for HTTPS)
 WiFiSSLClient clientArtik;                // Definition Class WiFiSSLClient
 String AuthorizationData = "Authorization: Bearer <INSERT YOU ID>";  // Autorization Id --> please Insert you ID
 char buffer[200];                         // buffer is used by send message to Cloud
 
-// Parameters WIFI conection
+// Set Parameters WIFI conection
 char ssid[] = "YOU SSID WIFI";      //  your wifi network SSID (name)
 char pass[] = "THE PASSWORD WIFI";  // your password wifi
 int status = WL_IDLE_STATUS;        // status is used know result WiFi connection (WiFI.begin)
 
-// Variable and Constant used in Program 
+// Set Variable and Constant used in Program 
 int SENSORDOOR = 3; // define the obstacle avoidance sensor interface - MKR1000 pin ~3
 int BUZZERPIN = 6; // define the BUZZER  sensor interface - MKR1000 pin 6
 int Sensorval ;// define numeric variable asociate a input value obstacle avoidance sensor 
 unsigned long currentMillis = 0, previousMillis=0;  // variable used to control elapsed time between open and close door
 unsigned signalDuration=300; // lapsed time long BEEP sound
 unsigned int CountSendAlert=1; // variable used to control message to Artik
-const long intervalBEEP = 20*1000; // => 20 secons Door Open -> Sound Alarm
-const int IntervalSendAlert = 5 ; // => variable used to control the elapsed time  -> in MINUTES ( It must be set equal to RULE ARTIK CLOUD definitions).
-const long intervalMAIL = IntervalSendAlert * 60 * 1000; // => the value (IntervalSendAlert) means minutes Door Open too long -> Message to Artik
+const long intervalBEEP = 25*1000; // => ( 20 secons DEFAULT) Door Open Detect -> Sound Alarm
+const int IntervalSendAlert = 5 ; // => (5 minutes DEFAULT) - variable used to control the elapsed time  -> in MINUTES ( It must be set equal to RULE ARTIK CLOUD definitions).
+const long intervalMAIL = IntervalSendAlert * 60 * 1000; // => the value (IntervalSendAlert) means minutes Door Open too long -> Message to Artik -> SendMail
 
 
 void setup ()
