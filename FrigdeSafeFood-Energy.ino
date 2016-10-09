@@ -26,7 +26,7 @@ int Sensorval ;// define numeric variable asociate a input value obstacle avoida
 unsigned long currentMillis = 0, previousMillis=0;  // variable used to control elapsed time between open and close door
 unsigned signalDuration=300; // lapsed time long BEEP sound
 unsigned int CountSendAlert=1; // variable used to control message to Artik
-const long intervalBEEP = 25*1000; // => ( 20 secons DEFAULT) Door Open Detect -> Sound Alarm
+const long intervalBEEP = 20*1000; // => ( 20 secons DEFAULT) Door Open Detect -> Sound Alarm
 const int IntervalSendAlert = 5 ; // => (5 minutes DEFAULT) - variable used to control the elapsed time  -> in MINUTES ( It must be set equal to RULE ARTIK CLOUD definitions).
 const long intervalMAIL = IntervalSendAlert * 60 * 1000; // => the value (IntervalSendAlert) means minutes Door Open too long -> Message to Artik -> SendMail
 
